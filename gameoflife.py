@@ -2,12 +2,29 @@
 
 import tkinter as tk
 import time
+import math
 
-scaling = 20
+scaling = 5
+cell_size = 5 
 
-window_height = 9 * scaling
+'''
+Set the window size
+Always make sure, the window size is an integer multiple of the cell size,
+while trying to stay to 16x9 format
+'''
 window_width = 16 * scaling
+window_height = 9 * scaling
 
+if 0 != (window_height % cell_size):
+    window_height = math.floor(window_height/cell_size)*cell_size
+
+if 0 != (window_width % cell_size):
+    window_width = math.floor(window_width/cell_size)*cell_size
+
+num_cell_x = int(window_width/cell_size)
+num_cell_y = int(window_height/cell_size)
+
+print(str(num_cell_x)+"x"+str(num_cell_y)+" cells with size "+str(cell_size))
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -15,27 +32,23 @@ class Application(tk.Frame):
         self.draw_layer = tk.Canvas(master, width=window_width, height=window_height)
         self.draw_layer.pack()
         
-        self.current_matrix = [[0 for x in range(window_height)] for y in range(window_width)] 
-        self.next_matrix = [[0 for x in range(window_height)] for y in range(window_width)] 
+        self.current_matrix = [[0 for y in range(num_cell_y+1)] for x in range(num_cell_x+1)] 
+        self.next_matrix = [[0 for y in range(num_cell_y+1)] for x in range(num_cell_x+1)] 
 
         time_begin = time.time()
 
-        for i in range(window_width):
-            for j in range(window_height):
-                self.current_matrix[i][j] = self.draw_layer.create_rectangle(i, j, i+1, j+1, outline='')
-                self.next_matrix[i][j] = self.current_matrix[i][j]
+        for pos_x in range(num_cell_x+1):
+            for pos_y in range(num_cell_y+1):
+                print(str(pos_x)+"-"+str(pos_y)+" "+str(pos_x*cell_size)+"-"+str(pos_y*cell_size))
+                self.current_matrix[pos_x][pos_y] = self.draw_layer.create_rectangle(pos_x*cell_size, pos_y*cell_size, cell_size+1, cell_size+1, width=0, fill='')
+                self.next_matrix[pos_x][pos_y] = self.current_matrix[pos_x][pos_y]
 
         time_end = time.time()
 
         # Create initial glider pattern
-        self.draw_layer.itemconfig(self.current_matrix[6][5], outline='black')
-        self.draw_layer.itemconfig(self.current_matrix[7][6], outline='black')
-        self.draw_layer.itemconfig(self.current_matrix[5][7], outline='black')
-        self.draw_layer.itemconfig(self.current_matrix[6][7], outline='black')
-        self.draw_layer.itemconfig(self.current_matrix[7][7], outline='black')
+        self.draw_layer.itemconfig(self.current_matrix[0][5], fill='green')
         
-
-        print("Initialization of "+str(window_width)+"x"+str(window_height)+" took "+str(time_end-time_begin)+" ms")
+        print("Initialization of "+str(num_cell_x*num_cell_y)+" cells withing "+str(window_width)+"x"+str(window_height)+" pixels took "+str(time_end-time_begin)+" ms")
 
         self.after(20, self.update)
 
@@ -52,12 +65,9 @@ class Application(tk.Frame):
                     4. Rule
                         A living cell with more than threee living neighbours will die
                 '''
-                if self.current_matrix                
+        self.draw_layer.move(self.current_matrix[0][5], 1, 1)
 
-        self.after(20, self.update)
-
-    def get_neighbours(self):
-        
+        self.after(200, self.update)
 
 app = Application()
 app.master.title('Game of Life Simulation '+str(window_width)+'x'+str(window_height))
