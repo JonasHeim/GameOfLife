@@ -3,8 +3,9 @@
 import tkinter as tk
 import time
 import math
+import random
 
-scaling = 200
+scaling = 50
 cell_size = 5 
 
 '''
@@ -43,11 +44,6 @@ class Application(tk.Frame):
                 self.next_matrix[pos_x][pos_y] = self.current_matrix[pos_x][pos_y]
 
         time_end = time.time()
-
-        for pos in range(num_cell_y):
-            self.draw_layer.itemconfig(self.current_matrix[pos][pos], fill='blue')
-        for pos in range(num_cell_y-1, -1, -1):
-            self.draw_layer.itemconfig(self.current_matrix[num_cell_y-pos-1][pos], fill='red')
         
         print("Initialization of "+str(num_cell_x*num_cell_y)+" cells withing "+str(window_width)+"x"+str(window_height)+" pixels took "+str(time_end-time_begin)+" ms")
 
@@ -66,11 +62,18 @@ class Application(tk.Frame):
                     4. Rule
                         A living cell with more than threee living neighbours will die
                 '''
-        for pos in range(num_cell_y):
-            self.draw_layer.move(self.current_matrix[pos][pos], scaling/cell_size, 0)
-        for pos in range(num_cell_y-1, -1, -1):
-            self.draw_layer.move(self.current_matrix[num_cell_y-pos-1][pos], scaling/cell_size, 0)
-        self.after(20, self.update)
+
+        #Color table
+        color_table = ['red', 'black', 'green', 'blue']
+
+        for i in range(10):
+            rand_pos_x = random.randint(0, num_cell_x-1)
+            rand_pos_y = random.randint(0, num_cell_y-1)
+            rand_color = random.randint(0, len(color_table)-1)
+
+            self.draw_layer.itemconfig(self.current_matrix[rand_pos_x][rand_pos_y], fill=color_table[rand_color])
+        
+        self.after(1, self.update)
 
     def get_neighbours(self, pos_x, pos_y):
         # Check the four corners at first
