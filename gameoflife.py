@@ -6,7 +6,7 @@ import math
 import random
 
 scaling = 50
-cell_size = 5 
+cell_size = 1 
 
 '''
 Set the window size
@@ -47,7 +47,7 @@ class Application(tk.Frame):
         
         print("Initialization of "+str(num_cell_x*num_cell_y)+" cells withing "+str(window_width)+"x"+str(window_height)+" pixels took "+str(time_end-time_begin)+" ms")
 
-        self.after(20, self.update)
+        self.after(1, self.update)
 
     def update(self):
         for i in range(window_width):
@@ -63,15 +63,11 @@ class Application(tk.Frame):
                         A living cell with more than threee living neighbours will die
                 '''
 
-        #Color table
-        color_table = ['red', 'black', 'green', 'blue']
-
-        for i in range(10):
+        for i in range(100):
             rand_pos_x = random.randint(0, num_cell_x-1)
             rand_pos_y = random.randint(0, num_cell_y-1)
-            rand_color = random.randint(0, len(color_table)-1)
 
-            self.draw_layer.itemconfig(self.current_matrix[rand_pos_x][rand_pos_y], fill=color_table[rand_color])
+            self.draw_layer.itemconfig(self.current_matrix[rand_pos_x][rand_pos_y], fill="#"+("%06x"%random.randint(0,16777215)))
         
         self.after(1, self.update)
 
@@ -92,6 +88,10 @@ class Application(tk.Frame):
         else:
             print("No corner")
 
-app = Application()
-app.master.title('Game of Life Simulation '+str(window_width)+'x'+str(window_height))
-app.mainloop()
+try:
+    app = Application()
+    app.master.title('Game of Life Simulation '+str(window_width)+'x'+str(window_height))
+    app.mainloop()
+except KeyboardInterrupt:
+    print("Exiting...")
+    app.destroy()
