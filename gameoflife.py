@@ -6,8 +6,8 @@ import time
 import math
 import random
 
-scaling = 50
-cell_size = 10
+scaling = 75
+cell_size = 20
 
 '''
 Set the window size
@@ -48,27 +48,37 @@ class Application(tk.Frame):
         
         #Create label for FPS
         self.font_fps = font.Font(family='Times', size=10, weight='bold')
-        self.label_fps = self.draw_layer.create_text(10, 10, text='0', font=self.font_fps, fill='blue')
+        self.label_fps = self.draw_layer.create_text(20, 10, text='0', font=self.font_fps, fill='red')
 
-        #Create initial glider pattern
+        #Create initial glider pattern #1
         self.draw_layer.itemconfig(self.current_matrix[6][5], fill='black')
         self.draw_layer.itemconfig(self.current_matrix[7][6], fill='black')
         self.draw_layer.itemconfig(self.current_matrix[5][7], fill='black')
         self.draw_layer.itemconfig(self.current_matrix[6][7], fill='black')
         self.draw_layer.itemconfig(self.current_matrix[7][7], fill='black')
 
+        #Create initial glider pattern #2
+        self.draw_layer.itemconfig(self.current_matrix[11][5], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[12][6], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[10][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[11][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[12][7], fill='black')
+
 
         print("Initialization of "+str(num_cell_x*num_cell_y)+" cells withing "+str(window_width)+"x"+str(window_height)+" pixels took "+str(time_end-time_begin)+" s")
 
-        self.after(2000, self.update)
+        self.after(200, self.update)
 
     def update(self):
         #Check every cell
-        #TODO
         time_begin = time.time()
         for pos_x in range(num_cell_x):
             for pos_y in range(num_cell_y):
-                '''
+                #Get living neighbours of current cell
+                current_neighbours = self.get_living_neighbours(pos_x, pos_y)
+                
+                ''' Game rules
+                
                     1. Rule
                         A dead cell is reborn, if it has exact three alive neighours
                     2. Rule
@@ -78,36 +88,50 @@ class Application(tk.Frame):
                     4. Rule
                         A living cell with more than three living neighbours will die
                 '''
-
-                current_neighbours = self.get_living_neighbours(pos_x, pos_y)
-                if 0 != current_neighbours:
-                    print("X: "+str(pos_x)+" Y: "+str(pos_y)+" - "+str(current_neighbours)+" living cells")
-
-                if (3 == current_neighbours) or (2 == current_neighbours):
-                    #Cell is reborn/stays alive
-                    self.next_matrix[pos_x][pos_y] = 1
-                elif (2 > current_neighbours) or (3 < current_neighbours):
-                    #Cell will die
-                    self.next_matrix[pos_x][pos_y] = 0
+                if '' != self.draw_layer.itemcget(self.current_matrix[pos_x][pos_y], "fill"):
+                    #Cell lives
+                    if (2 > current_neighbours) or (3 < current_neighbours):
+                        #Cell dies
+                        #Rule 2 and 4
+                        self.next_matrix[pos_x][pos_y] = 0
+                        #print(str(pos_x)+":"+str(pos_y)+" dies - "+str(current_neighbours)+" cells alive")
+                    else:
+                        #Cell stays alive
+                        #Rule 3
+                        self.next_matrix[pos_x][pos_y] = 1
+                        #print(str(pos_x)+":"+str(pos_y)+" stays alive - "+str(current_neighbours)+" cells alive")
+                else:
+                    #Cell is dead
+                    #Rule 1
+                    if 3 == current_neighbours:
+                        #Cell gets reborn
+                        self.next_matrix[pos_x][pos_y] = 1
+                        #print(str(pos_x)+":"+str(pos_y)+" becomes alive - "+str(current_neighbours)+" cells alive")
+                    # else:
+                    #     #Cell stays dead
+                    #     print(str(pos_x)+":"+str(pos_y)+" stays dead - "+str(current_neighbours)+" cells alive")
 
         #Set pixel according to rules
         for pos_x in range(num_cell_x):
             for pos_y in range(num_cell_y):
                 if 1 == self.next_matrix[pos_x][pos_y]:
                     self.draw_layer.itemconfig(self.current_matrix[pos_x][pos_y], fill='black')
+
+                    #Reset next matrix
+                    self.next_matrix[pos_x][pos_y] = 0
                 else:
                     self.draw_layer.itemconfig(self.current_matrix[pos_x][pos_y], fill='')
-                #Reset next matrix
-                self.next_matrix[pos_x][pos_y] = 0
+                
 
         time_end = time.time()
 
-        self.draw_layer.itemconfig(self.label_fps, text=str(math.floor(1/(time_end-time_begin))))
+        self.draw_layer.itemconfig(self.label_fps, text=str(math.floor(1/(time_end-time_begin)))+"fps")
         
         self.after(1, self.update)
 
     def get_living_neighbours(self, pos_x, pos_y):
         #Check all surrounding cells
+        #We assumne that every cell behind an edge is dead
         #TL TM TR
         #LM    RM
         #BL BM BR
