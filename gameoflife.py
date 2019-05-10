@@ -6,8 +6,8 @@ import time
 import math
 import random
 
-scaling = 75
-cell_size = 20
+scaling = 25
+cell_size = 5
 
 '''
 Set the window size
@@ -48,7 +48,7 @@ class Application(tk.Frame):
         
         #Create label for FPS
         self.font_fps = font.Font(family='Times', size=10, weight='bold')
-        self.label_fps = self.draw_layer.create_text(20, 10, text='0', font=self.font_fps, fill='red')
+        self.label_fps = self.draw_layer.create_text(10, 10, text='0', font=self.font_fps, fill='red', anchor=tk.NW)
 
         #Create initial glider pattern #1
         self.draw_layer.itemconfig(self.current_matrix[6][5], fill='black')
@@ -64,10 +64,31 @@ class Application(tk.Frame):
         self.draw_layer.itemconfig(self.current_matrix[11][7], fill='black')
         self.draw_layer.itemconfig(self.current_matrix[12][7], fill='black')
 
+        #Create initial glider pattern #3
+        self.draw_layer.itemconfig(self.current_matrix[16][5], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[17][6], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[15][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[16][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[17][7], fill='black')
+
+        #Create initial glider pattern #4
+        self.draw_layer.itemconfig(self.current_matrix[21][5], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[22][6], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[20][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[21][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[22][7], fill='black')
+
+        #Create initial glider pattern #5
+        self.draw_layer.itemconfig(self.current_matrix[26][5], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[27][6], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[25][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[26][7], fill='black')
+        self.draw_layer.itemconfig(self.current_matrix[27][7], fill='black')
+
 
         print("Initialization of "+str(num_cell_x*num_cell_y)+" cells withing "+str(window_width)+"x"+str(window_height)+" pixels took "+str(time_end-time_begin)+" s")
 
-        self.after(200, self.update)
+        self.after(1, self.update)
 
     def update(self):
         #Check every cell
@@ -75,7 +96,7 @@ class Application(tk.Frame):
         for pos_x in range(num_cell_x):
             for pos_y in range(num_cell_y):
                 #Get living neighbours of current cell
-                current_neighbours = self.get_living_neighbours(pos_x, pos_y)
+                current_neighbours = self.get_living_neighbours_wrap_edges(pos_x, pos_y)
                 
                 ''' Game rules
                 
@@ -125,11 +146,13 @@ class Application(tk.Frame):
 
         time_end = time.time()
 
-        self.draw_layer.itemconfig(self.label_fps, text=str(math.floor(1/(time_end-time_begin)))+"fps")
+        #print("Tick calculation took "+str(time_end-time_begin)+"s")
+
+        self.draw_layer.itemconfig(self.label_fps, text=str(round(1/(time_end-time_begin), 2))+"fps")
         
         self.after(1, self.update)
 
-    def get_living_neighbours(self, pos_x, pos_y):
+    def get_living_neighbours_dead_edges(self, pos_x, pos_y):
         #Check all surrounding cells
         #We assumne that every cell behind an edge is dead
         #TL TM TR
@@ -188,6 +211,139 @@ class Application(tk.Frame):
                 retval += 1
 
         return retval
+
+    def get_living_neighbours_wrap_edges(self, pos_x, pos_y):
+        #Check all surrounding cells
+        #We assumne that every cell behind an edge is dead
+        #TL TM TR
+        #LM    RM
+        #BL BM BR
+
+        retval = 0
+
+        #TL
+        if 0 == pos_x:
+            #We are on left edge
+            if 0 == pos_y:
+                #We are on top left corner, so wrap around x and y
+                if "" != self.draw_layer.itemcget(self.current_matrix[num_cell_x-1][num_cell_y-1], "fill"):
+                    retval += 1
+            else:
+                #Simple left edge, so wrap around x
+                if "" != self.draw_layer.itemcget(self.current_matrix[num_cell_x-1][pos_y-1], "fill"):
+                    retval += 1
+        elif 0 == pos_y:
+            #We are on top edge, so wrap around y
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x-1][num_cell_y-1], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x-1][pos_y-1], "fill"):
+                retval += 1
+
+        #TM
+        #Are we on top edge
+        if 0 == pos_y:
+            #We are on top edge, so wrap around y
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x][num_cell_y-1], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x][pos_y-1], "fill"):
+                retval += 1
+
+        #TR
+        if num_cell_x-1 == pos_x:
+            #We are on right edge
+            if 0 == pos_y:
+                #We are on top right corner, so wrap around x and y
+                if "" != self.draw_layer.itemcget(self.current_matrix[0][num_cell_y-1], "fill"):
+                    retval += 1
+            else:
+                #Simple right edge, so wrap around x
+                if "" != self.draw_layer.itemcget(self.current_matrix[0][pos_y-1], "fill"):
+                    retval += 1
+        elif 0 == pos_y:
+            #We are on top edge, so wrap around y
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x+1][num_cell_y-1], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x+1][pos_y-1], "fill"):
+                retval += 1
+
+        #LM
+        if 0 == pos_x:
+            #We are on left edge, so wrap around x
+            if "" != self.draw_layer.itemcget(self.current_matrix[num_cell_x-1][pos_y], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x-1][pos_y], "fill"):
+                retval += 1
+
+        #RM
+        if (num_cell_x-1) == pos_x:
+            #We are on right edge, so wrap around x
+            if "" != self.draw_layer.itemcget(self.current_matrix[0][pos_y], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x+1][pos_y], "fill"):
+                retval += 1
+
+        #BL
+        if 0 == pos_x:
+            #We are on left edge
+            if (num_cell_y-1) == pos_y:
+                #We are on bottom left corner, so wrap around x and y
+                if "" != self.draw_layer.itemcget(self.current_matrix[num_cell_x-1][0], "fill"):
+                    retval += 1
+            else:
+                #Simple left edge, so wrap around x
+                if "" != self.draw_layer.itemcget(self.current_matrix[num_cell_x-1][pos_y+1], "fill"):
+                    retval += 1
+        elif (num_cell_y-1) == pos_y:
+            #we are on bottom edge, so wrap around y
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x-1][0], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x-1][pos_y+1], "fill"):
+                retval += 1
+        
+        #BM
+        if (num_cell_y-1) == pos_y:
+            #we are on bottom edge, so wrap around y
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x][0], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x][pos_y+1], "fill"):
+                retval += 1
+
+        #BR
+        if (num_cell_x-1) == pos_x:
+            #We are on right edge
+            if (num_cell_y-1) == pos_y:
+                #we are on bottom right corner, so wrap around x and y
+                if "" != self.draw_layer.itemcget(self.current_matrix[0][0], "fill"):
+                    retval += 1
+            else:
+                #Simple right edge, so wrap around x
+                if "" != self.draw_layer.itemcget(self.current_matrix[0][pos_y+1], "fill"):
+                    retval += 1
+        elif (num_cell_y-1) == pos_y:
+            #We are on bottom edge, so wrap around y
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x+1][0], "fill"):
+                retval += 1
+        else:
+            #No edge cell
+            if "" != self.draw_layer.itemcget(self.current_matrix[pos_x+1][pos_y+1], "fill"):
+                retval += 1
+
+        return retval
+
 try:    
     app = Application()
     app.master.title('Game of Life Simulation '+str(window_width)+'x'+str(window_height))
