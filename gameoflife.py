@@ -6,7 +6,7 @@ import time
 import math
 import random
 
-scaling = 100
+scaling = 50
 cell_size = 10
 
 '''
@@ -30,6 +30,7 @@ print(str(num_cell_x)+"x"+str(num_cell_y)+" cells with size "+str(cell_size))
 
 class Application(tk.Frame):
     def __init__(self, master=None):
+        self.generation = 0
         tk.Frame.__init__(self, master)
         self.draw_layer = tk.Canvas(master, width=window_width, height=window_height, borderwidth=0, highlightthickness=0)
         self.draw_layer.pack(expand=tk.TRUE, fill=tk.BOTH)
@@ -46,7 +47,11 @@ class Application(tk.Frame):
         
         #Create label for FPS
         self.font_fps = font.Font(family='Times', size=10, weight='bold')
-        self.label_fps = self.draw_layer.create_text(10, 10, text='0', font=self.font_fps, fill='red', anchor=tk.NW)
+        self.label_fps = self.draw_layer.create_text(10, 10, text='FPS:\t', font=self.font_fps, fill='red', anchor=tk.NW)
+
+        #Create label for generation
+        self.font_generation = font.Font(family='Times', size=10, weight='bold')
+        self.label_generation = self.draw_layer.create_text(10, 20, text='Gen.:\t0', font=self.font_generation, fill='red', anchor=tk.NW)
 
         #Create initial glider pattern #1
         self.current_matrix[6][5] = 1
@@ -155,8 +160,13 @@ class Application(tk.Frame):
         #print("Tick calculation took "+str(time_end-time_begin)+"s")
 
         if 0 != (time_end-time_begin):
-            self.draw_layer.itemconfig(self.label_fps, text=str(round(1/(time_end-time_begin), 2))+"fps")
+            self.draw_layer.itemconfig(self.label_fps, text="FPS:\t"+str(round(1/(time_end-time_begin), 2)))
         
+        #Refresh generation
+        self.draw_layer.itemconfig(self.label_generation, text="Gen.:\t"+str(self.generation))
+
+        self.generation += 1
+
         self.after(1, self.update)
 
     def get_living_neighbours_dead_edges(self, pos_x, pos_y):
