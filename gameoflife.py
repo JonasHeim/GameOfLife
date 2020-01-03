@@ -21,7 +21,6 @@ def main():
 
     #Start simulation
     app = Application(scaling=args.scaling, cell_size=args.cell_size, max_generation=args.max_generation, verbosity=args.verbosity, wrapping=args.wrap)
-    app.master.title('Game of Life Simulation ('+str(app.get_window_dimension()[0])+'x'+str(app.get_window_dimension()[1])+')')
     app.master.iconbitmap('./images/Glider.ico')
     app.mainloop()
 
