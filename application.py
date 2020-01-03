@@ -13,6 +13,9 @@ class Application(tk.Frame):
         self.is_verbose = verbosity
         self.wrap = wrapping
 
+        #Used for pausing/unpausing the simulation
+        self.is_paused = False
+
         if self.scaling < 10:
             raise ValueError("Scaling must be greater or equal 10!")
 
@@ -40,9 +43,20 @@ class Application(tk.Frame):
         #Print out dimenstions
         print(str(self.num_cell_x)+"x"+str(self.num_cell_y)+" cells with size "+str(self.cell_size))
 
+        self.default_title = 'Game of Life Simulation ('+str(self.get_window_dimension()[0])+'x'+str(self.get_window_dimension()[1])+')'
+
         self.generation = 0
         tk.Frame.__init__(self, master)
         self.draw_layer = tk.Canvas(master, width=self.window_width, height=self.window_height, borderwidth=0, highlightthickness=0)
+
+        '''
+        Add keyboard bindings
+        '''
+        #Need to use bind_all for spacebar, to create a binding for the whole application
+        self.draw_layer.bind_all('<space>', self.pause_simulation)
+        self.draw_layer.bind_all('<Return>', self.step_simulation)
+
+
         self.draw_layer.pack(expand=tk.TRUE, fill=tk.BOTH)
         
         self.current_matrix = [[0 for y in range(self.num_cell_y)] for x in range(self.num_cell_x)] 
@@ -65,40 +79,40 @@ class Application(tk.Frame):
             self.font_generation = font.Font(family='Times', size=10, weight='bold')
             self.label_generation = self.draw_layer.create_text(10, 20, text='Gen.:\t0', font=self.font_generation, fill='red', anchor=tk.NW)
 
-        # #Create initial glider pattern #1
-        # self.current_matrix[6][5] = 1
-        # self.current_matrix[7][6] = 1
-        # self.current_matrix[5][7] = 1
-        # self.current_matrix[6][7] = 1
-        # self.current_matrix[7][7] = 1
+        #Create initial glider pattern #1
+        self.current_matrix[6][5] = 1
+        self.current_matrix[7][6] = 1
+        self.current_matrix[5][7] = 1
+        self.current_matrix[6][7] = 1
+        self.current_matrix[7][7] = 1
 
-        # #Create initial glider pattern #2
-        # self.current_matrix[11][5] = 1
-        # self.current_matrix[12][6] = 1
-        # self.current_matrix[10][7] = 1
-        # self.current_matrix[11][7] = 1
-        # self.current_matrix[12][7] = 1
+        #Create initial glider pattern #2
+        self.current_matrix[11][5] = 1
+        self.current_matrix[12][6] = 1
+        self.current_matrix[10][7] = 1
+        self.current_matrix[11][7] = 1
+        self.current_matrix[12][7] = 1
 
-        # #Create initial glider pattern #3
-        # self.current_matrix[16][5] = 1
-        # self.current_matrix[17][6] = 1
-        # self.current_matrix[15][7] = 1
-        # self.current_matrix[16][7] = 1
-        # self.current_matrix[17][7] = 1
+        #Create initial glider pattern #3
+        self.current_matrix[16][5] = 1
+        self.current_matrix[17][6] = 1
+        self.current_matrix[15][7] = 1
+        self.current_matrix[16][7] = 1
+        self.current_matrix[17][7] = 1
 
-        # #Create initial glider pattern #4
-        # self.current_matrix[21][5] = 1
-        # self.current_matrix[22][6] = 1
-        # self.current_matrix[20][7] = 1
-        # self.current_matrix[21][7] = 1
-        # self.current_matrix[22][7] = 1
+        #Create initial glider pattern #4
+        self.current_matrix[21][5] = 1
+        self.current_matrix[22][6] = 1
+        self.current_matrix[20][7] = 1
+        self.current_matrix[21][7] = 1
+        self.current_matrix[22][7] = 1
 
-        # #Create initial glider pattern #5
-        # self.current_matrix[26][5] = 1
-        # self.current_matrix[27][6] = 1
-        # self.current_matrix[25][7] = 1
-        # self.current_matrix[26][7] = 1
-        # self.current_matrix[27][7] = 1
+        #Create initial glider pattern #5
+        self.current_matrix[26][5] = 1
+        self.current_matrix[27][6] = 1
+        self.current_matrix[25][7] = 1
+        self.current_matrix[26][7] = 1
+        self.current_matrix[27][7] = 1
 
         #Bring in some randomization
         for i in range(500):
@@ -117,14 +131,17 @@ class Application(tk.Frame):
         #Schedule periodic update
         self.after(1, self.update)
 
-    def update(self):
+    def update(self, force = False):
+
+        if self.is_paused and not force:
+            return
 
         #Check if generation is limited
         if self.max_generation != 0:
             #Check if maximum is reached
             if self.generation == self.max_generation:
                 #Maximum is reached; set window title and stop simulation
-                self.master.title('TERMINATED - ' + self.master.title())
+                self.set_title('TERMINATED')
                 return
 
         #Check every cell
@@ -386,3 +403,23 @@ class Application(tk.Frame):
 
     def get_window_dimension(self):
         return self.window_width, self.window_height
+
+    def set_title(self, title):
+        if title == "":
+            self.master.title(self.default_title)
+        else:
+            self.master.title(title + ' - ' + self.default_title)
+
+    def pause_simulation(self, event):
+        if self.is_paused:
+            self.is_paused = False
+            self.set_title("")
+            self.after(1, self.update)
+        else:
+            self.is_paused = True
+            self.set_title("PAUSED")
+
+    def step_simulation(self, event):
+        #Only step if simulation is paused
+        if self.is_paused:
+            self.after(1, self.update, True)

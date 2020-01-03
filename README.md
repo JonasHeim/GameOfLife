@@ -23,3 +23,11 @@ python gameoflife.py <args>
 | -s <br> --scaling | >= 10 | Sets the display dimenstion. Is multiplied by display ratio (16:9).
 | -c <br> --cellsize | >= 1 | Sets the size of a cell in pixel (squared).
 | -m <br> --maxgeneration | >= 0 | Sets the generation when to stop the simulation. If set to 0, the simulation will not stop.
+
+### Pausing and stepping
+The simulation can be paused and unpaused by pressing the **Spacebar** once.
+
+If the simulation is paused you can step to the next generation by pressing **Return**.
+
+### Screenshot
+![Screenshot](./images/Screenshot.png)
