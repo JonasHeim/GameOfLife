@@ -52,9 +52,11 @@ class Application(tk.Frame):
         '''
         Add keyboard bindings
         '''
-        #Need to use bind_all for spacebar, to create a binding for the whole application
+        #Need to use bind_all for spacebar and return, to create a binding for the whole application
         self.draw_layer.bind_all('<space>', self.pause_simulation)
         self.draw_layer.bind_all('<Return>', self.step_simulation)
+
+        self.draw_layer.bind('<Button-1>', self.mouse_clicked)
 
 
         self.draw_layer.pack(expand=tk.TRUE, fill=tk.BOTH)
@@ -67,7 +69,7 @@ class Application(tk.Frame):
         #Create handles for cells
         for pos_x in range(self.num_cell_x):
             for pos_y in range(self.num_cell_y):
-                self.next_matrix[pos_x][pos_y] = self.draw_layer.create_rectangle(pos_x*cell_size, pos_y*cell_size, pos_x*cell_size+cell_size+1, pos_y*cell_size+cell_size+1, width=0, fill='')
+                self.next_matrix[pos_x][pos_y] = self.draw_layer.create_rectangle(pos_x*cell_size, pos_y*cell_size, pos_x*cell_size+cell_size+1, pos_y*cell_size+cell_size+1, width=0, activefill='red', fill='')
         
         if self.is_verbose:
             #Create label for FPS
@@ -423,3 +425,15 @@ class Application(tk.Frame):
         #Only step if simulation is paused
         if self.is_paused:
             self.after(1, self.update, True)
+
+    def mouse_clicked(self, event):
+        #Only enable manipulation if simulation is paused
+        if self.is_paused:
+            self.toggle_cell(int(event.x/self.cell_size), int(event.y/self.cell_size))
+
+    def toggle_cell(self, pos_x, pos_y):
+        #Get current state of cell
+        if '' != self.draw_layer.itemcget(self.next_matrix[pos_x][pos_y], "fill"):
+            self.draw_layer.itemconfig(self.next_matrix[pos_x][pos_y], fill='')
+        else:
+            self.draw_layer.itemconfig(self.next_matrix[pos_x][pos_y], fill='black')
