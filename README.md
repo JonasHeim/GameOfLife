@@ -24,10 +24,14 @@ python gameoflife.py <args>
 | -c <br> --cellsize | >= 1 | Sets the size of a cell in pixel (squared).
 | -m <br> --maxgeneration | >= 0 | Sets the generation when to stop the simulation. If set to 0, the simulation will not stop.
 
-### Pausing and stepping
+### Pausingand stepping
 The simulation can be paused and unpaused by pressing the **Spacebar** once.
 
-If the simulation is paused you can step to the next generation by pressing **Return**.
+If the simulation is paused you can
+* step to the next generation by pressing **Return**.
+* toggle single cells by clicking on them with the mouse. Alive cells will die, and dead cells will be resurrected. The cell the mouse is hovering over is marked in red.
+
+
 
 ### Screenshot
 ![Screenshot](./images/Screenshot.png)
